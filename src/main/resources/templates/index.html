@@ -41,10 +41,12 @@
 </div>
 
 <div id="search-area">
+<!--  input창에 데이터를 넣고 Enter를 누르면 query값이 basic.js로 보내지고 execSearch()로직 실행 -->
   <div>
     <input type="text" id="query">
   </div>
-<!--  검색 결과 목록 데이터를 보여주는 부분  -->
+
+<!--  검색 결과 목록 데이터를 보여주고, save.png 버튼 클릭시 관심 등록 해주는 부분 -> [POST] /api/products  -->
   <div id="search-result-box">
   </div>
 
@@ -58,6 +60,7 @@
       <h1>⏰최저가 설정하기</h1>
       <p>최저가를 설정해두면 선택하신 상품의 최저가가 떴을 때<br/> 표시해드려요!</p>
       <div>
+        <!--  myprice 값 지정하고, setMyprice()를 통하여 처리 -> [PUT] /api/product/${id} -->
         <input type="text" id="myprice" placeholder="200,000">원
       </div>
       <button class="cta" onclick="setMyprice()">설정하기</button>

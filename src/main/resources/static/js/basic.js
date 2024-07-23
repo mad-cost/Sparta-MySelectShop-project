@@ -68,6 +68,7 @@ function execSearch() {
             // 4. for 문마다 itemDto를 꺼내서 HTML 만들고 검색결과 목록에 붙이기!
             for (let i = 0; i < response.length; i++) {
                 let itemDto = response[i];
+                // addHTML(): 검색 결과 데이터 한 칸씩 만들어서 보여주는 메서드
                 let tempHtml = addHTML(itemDto);
                 $('#search-result-box').append(tempHtml);
             }
@@ -80,7 +81,7 @@ function execSearch() {
 
 }
 
-// 검색 결과 데이터 한 칸씩 만드는 곳
+// 검색 결과 데이터 한 칸씩 만드는 곳 / save.png 버튼 클릭시 관심 등록 되는 곳
 function addHTML(itemDto) {
     /**
      * class="search-itemDto" 인 녀석에서
@@ -99,6 +100,7 @@ function addHTML(itemDto) {
             </div>
         </div>
         <div class="search-itemDto-right">
+        
             <!-- save.png버튼 클릭시 addProduct()로 이동하여 로직 처리 / ProductController - [POST] /api/products로 이동        -->
             <img src="../images/icon-save.png" alt="" onclick='addProduct(${JSON.stringify(itemDto)})'>
         </div>
@@ -199,11 +201,12 @@ function setMyprice() {
         return;
     }
 
-    // 3. PUT /api/product/${targetId} 에 data를 전달한다.
+    // 3. ProductController - [PUT] /api/product/${targetId} 에 data를 전달한다.
     $.ajax({
         type: 'PUT',
         url: `/api/products/${targetId}`,
         contentType: 'application/json',
+        // body로 myprice값을 함께 보내준다
         data: JSON.stringify({myprice: myprice}),
         success: function (response) {
 
@@ -211,7 +214,7 @@ function setMyprice() {
             $('#container').removeClass('active');
             // 5. 성공적으로 등록되었음을 알리는 alert를 띄운다.
             alert('성공적으로 등록되었습니다.');
-            // 6. 창을 새로고침한다. window.location.reload();
+            // 6. 창을 새로고침한다. window.location.reload(); / http://localhost:8080로 이동
             window.location.reload();
         },
         error(error, status, request) {
