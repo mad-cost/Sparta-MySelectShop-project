@@ -5,23 +5,34 @@
   <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-
+  <meta property="og:title" content="00만의 셀렉샵">
+  <meta property="og:description" content="관심상품을 선택하고, 최저가 알림을 확인해보세요!">
+  <meta property="og:image" content="images/og_selectshop.png">
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"
           integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
   <script src="/js/basic.js"></script>
+
   <title>나만의 셀렉샵</title>
+
 </head>
 
 <body>
-
 <div class="header" style="position:relative;">
+
   <!--headr-->
-  <div id="header-title-select-shop">
-    My Select Shop
+  <div id="header-title-login-user">
+    <span id="username"></span> 님의
   </div>
+
+  <div id="header-title-select-shop">
+    Select Shop
+  </div>
+
+  <a id="login-text" href="javascript:logout()">
+    로그아웃
+  </a>
   <!--/headr-->
 </div>
 
@@ -35,28 +46,28 @@
 </div>
 
 <div id="see-area">
+  <!--  등록된 관심 상품을 보여준다  -->
   <div id="product-container">
 
   </div>
 </div>
 
 <div id="search-area">
-<!--  input창에 데이터를 넣고 Enter를 누르면 query값이 basic.js로 보내지고 execSearch()로직 실행 -->
+  <!--  input창에 데이터를 넣고 Enter를 누르면 query값이 basic.js로 보내지고 execSearch()로직 실행 -->
   <div>
     <input type="text" id="query">
   </div>
 
-<!--  검색 결과 목록 데이터를 보여주고, save.png 버튼 클릭시 관심 등록 해주는 부분 -> [POST] /api/products  -->
+  <!--  검색 결과 목록 데이터를 보여주고, save.png 버튼 클릭시 관심 등록 해주는 부분 -> [POST] /api/products  -->
   <div id="search-result-box">
   </div>
 
-<!--  저장 버튼(save.png) 클릭시 나오는 화면  -->
+  <!--  저장 버튼(save.png) 클릭시 나오는 화면  -->
   <div id="container" class="popup-container">
     <div class="popup">
       <button id="close" class="close">
         X
       </button>
-
       <h1>⏰최저가 설정하기</h1>
       <p>최저가를 설정해두면 선택하신 상품의 최저가가 떴을 때<br/> 표시해드려요!</p>
       <div>
@@ -68,5 +79,6 @@
   </div>
 </div>
 
+<input type="hidden" id="admin"/>
 </body>
 </html>

@@ -33,10 +33,13 @@ dependencies {
     implementation 'org.json:json:20231013'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    // security 사용할 때까지 잠깐주석 처리
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     compileOnly 'org.projectlombok:lombok'

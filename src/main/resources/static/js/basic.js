@@ -2,17 +2,49 @@ const host = 'http://' + window.location.host;
 let targetId;
 
 $(document).ready(function () {
+    const auth = getToken();
 
-    showProduct();
+    if (auth !== undefined && auth !== '') {
+        $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+            jqXHR.setRequestHeader('Authorization', auth);
+        });
+    } else {
+        window.location.href = host + '/api/user/login-page';
+        return;
+    }
 
-    // 검색창에 값을 넣고 Enter를 누르면 execSearch()로 이동
+    $.ajax({
+        type: 'GET',
+        url: `/api/user-info`,
+        contentType: 'application/json',
+    })
+        .done(function (res, status, xhr) {
+            const username = res.username;
+            const isAdmin = !!res.admin;
+
+            if (!username) {
+                window.location.href = '/api/user/login-page';
+                return;
+            }
+
+            $('#username').text(username);
+            if (isAdmin) {
+                $('#admin').text(true);
+                showProduct(true);
+            } else {
+                showProduct();
+            }
+        })
+        .fail(function (jqXHR, textStatus) {
+            logout();
+        });
+
     // id 가 query 인 녀석 위에서 엔터를 누르면 execSearch() 함수를 실행하라는 뜻입니다.
     $('#query').on('keypress', function (e) {
         if (e.key == 'Enter') {
             execSearch();
         }
     });
-
     $('#close').on('click', function () {
         $('#container').removeClass('active');
     })
@@ -57,31 +89,26 @@ function execSearch() {
         $('#query').focus();
         return;
     }
-    // 3. NaverApiController - [GET] /api/search?query=${query} 요청
+    // 3. GET /api/search?query=${query} 요청
     $.ajax({
         type: 'GET',
         url: `/api/search?query=${query}`,
-        // NaverSearchAPI 에서 데이터 받아오기 성공
         success: function (response) {
-            // 검색 결과 목록 데이터를 html로 반환하는 부분
             $('#search-result-box').empty();
             // 4. for 문마다 itemDto를 꺼내서 HTML 만들고 검색결과 목록에 붙이기!
             for (let i = 0; i < response.length; i++) {
                 let itemDto = response[i];
-                // addHTML(): 검색 결과 데이터 한 칸씩 만들어서 보여주는 메서드
                 let tempHtml = addHTML(itemDto);
                 $('#search-result-box').append(tempHtml);
             }
         },
-        // NaverSearchAPI 에서 데이터 받아오기 실패
         error(error, status, request) {
-            console.error(error);
+            logout();
         }
     })
 
 }
 
-// 검색 결과 데이터 한 칸씩 만드는 곳 / save.png 버튼 클릭시 관심 등록 되는 곳
 function addHTML(itemDto) {
     /**
      * class="search-itemDto" 인 녀석에서
@@ -100,8 +127,6 @@ function addHTML(itemDto) {
             </div>
         </div>
         <div class="search-itemDto-right">
-        
-            <!-- save.png버튼 클릭시 addProduct()로 이동하여 로직 처리 / ProductController - [POST] /api/products로 이동        -->
             <img src="../images/icon-save.png" alt="" onclick='addProduct(${JSON.stringify(itemDto)})'>
         </div>
     </div>`
@@ -120,7 +145,6 @@ function addProduct(itemDto) {
         type: 'POST',
         url: '/api/products',
         contentType: 'application/json',
-        // itemDto 객체를 JSON 문자열로 변환하는 역할. 이를 통해 JSON 데이터를 서버로 전송
         data: JSON.stringify(itemDto),
         success: function (response) {
             // 2. 응답 함수에서 modal을 뜨게 하고, targetId 를 reponse.id 로 설정
@@ -128,10 +152,11 @@ function addProduct(itemDto) {
             targetId = response.id;
         },
         error(error, status, request) {
-            console.log(error);
+            logout();
         }
     });
 }
+
 function showProduct(isAdmin = false) {
     /**
      * 관심상품 목록: #product-container
@@ -139,9 +164,18 @@ function showProduct(isAdmin = false) {
      * 관심상품 HTML 만드는 함수: addProductItem
      */
 
+    let dataSource = null;
+
+    // admin 계정
+    if (isAdmin) {
+        dataSource = `/api/admin/products`;
+    } else {
+        dataSource = `/api/products`;
+    }
+
     $.ajax({
         type: 'GET',
-        url: '/api/products',
+        url: dataSource,
         contentType: 'application/json',
         success: function (response) {
             $('#product-container').empty();
@@ -152,10 +186,13 @@ function showProduct(isAdmin = false) {
             }
         },
         error(error, status, request) {
-            console.log(error);
+            if (error.status === 403) {
+                $('html').html(error.responseText);
+                return;
+            }
+            logout();
         }
     });
-
 }
 
 function addProductItem(product) {
@@ -201,12 +238,11 @@ function setMyprice() {
         return;
     }
 
-    // 3. ProductController - [PUT] /api/product/${targetId} 에 data를 전달한다.
+    // 3. PUT /api/product/${targetId} 에 data를 전달한다.
     $.ajax({
         type: 'PUT',
         url: `/api/products/${targetId}`,
         contentType: 'application/json',
-        // body로 myprice값을 함께 보내준다
         data: JSON.stringify({myprice: myprice}),
         success: function (response) {
 
@@ -214,11 +250,29 @@ function setMyprice() {
             $('#container').removeClass('active');
             // 5. 성공적으로 등록되었음을 알리는 alert를 띄운다.
             alert('성공적으로 등록되었습니다.');
-            // 6. 창을 새로고침한다. window.location.reload(); / http://localhost:8080로 이동
+            // 6. 창을 새로고침한다. window.location.reload();
             window.location.reload();
         },
         error(error, status, request) {
-            console.error(error);
+            logout();
         }
     })
+}
+
+
+// 회원 기능을 위해 추가 / 이전 로직 설명 로그 지워졌다
+function logout() {
+    // 토큰 삭제
+    Cookies.remove('Authorization', {path: '/'});
+    window.location.href = host + '/api/user/login-page';
+}
+
+function getToken() {
+    let auth = Cookies.get('Authorization');
+
+    if (auth === undefined) {
+        return '';
+    }
+
+    return auth;
 }
