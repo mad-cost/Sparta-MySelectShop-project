@@ -5,12 +5,14 @@ $(document).ready(function () {
 
     showProduct();
 
+    // 검색창에 값을 넣고 Enter를 누르면 execSearch()로 이동
     // id 가 query 인 녀석 위에서 엔터를 누르면 execSearch() 함수를 실행하라는 뜻입니다.
     $('#query').on('keypress', function (e) {
         if (e.key == 'Enter') {
             execSearch();
         }
     });
+
     $('#close').on('click', function () {
         $('#container').removeClass('active');
     })
@@ -55,11 +57,13 @@ function execSearch() {
         $('#query').focus();
         return;
     }
-    // 3. GET /api/search?query=${query} 요청
+    // 3. NaverApiController - [GET] /api/search?query=${query} 요청
     $.ajax({
         type: 'GET',
         url: `/api/search?query=${query}`,
+        // NaverSearchAPI 에서 데이터 받아오기 성공
         success: function (response) {
+            // 검색 결과 목록 데이터를 html로 반환하는 부분
             $('#search-result-box').empty();
             // 4. for 문마다 itemDto를 꺼내서 HTML 만들고 검색결과 목록에 붙이기!
             for (let i = 0; i < response.length; i++) {
@@ -68,6 +72,7 @@ function execSearch() {
                 $('#search-result-box').append(tempHtml);
             }
         },
+        // NaverSearchAPI 에서 데이터 받아오기 실패
         error(error, status, request) {
             console.error(error);
         }
@@ -75,6 +80,7 @@ function execSearch() {
 
 }
 
+// 검색 결과 데이터 한 칸씩 만드는 곳
 function addHTML(itemDto) {
     /**
      * class="search-itemDto" 인 녀석에서
@@ -93,6 +99,7 @@ function addHTML(itemDto) {
             </div>
         </div>
         <div class="search-itemDto-right">
+            <!-- save.png버튼 클릭시 addProduct()로 이동하여 로직 처리 / ProductController - [POST] /api/products로 이동        -->
             <img src="../images/icon-save.png" alt="" onclick='addProduct(${JSON.stringify(itemDto)})'>
         </div>
     </div>`
@@ -111,6 +118,7 @@ function addProduct(itemDto) {
         type: 'POST',
         url: '/api/products',
         contentType: 'application/json',
+        // itemDto 객체를 JSON 문자열로 변환하는 역할. 이를 통해 JSON 데이터를 서버로 전송
         data: JSON.stringify(itemDto),
         success: function (response) {
             // 2. 응답 함수에서 modal을 뜨게 하고, targetId 를 reponse.id 로 설정
