@@ -4,6 +4,7 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.Product;
+import com.sparta.myselectshop.entity.User;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,8 @@ public class ProductService {
 
   public static final int MIN_MY_PRICE = 100; // 최저가 상수 설정
 
-  public ProductResponseDto createProduct(ProductRequestDto requestDto) {
-    Product product = productRepository.save(new Product(requestDto));
+  public ProductResponseDto createProduct(ProductRequestDto requestDto, User user) {
+    Product product = productRepository.save(new Product(requestDto, user));
     return new ProductResponseDto(product);
   }
 
@@ -43,8 +44,8 @@ public class ProductService {
   }
 
   // 관심 상품 조회
-  public List<ProductResponseDto> getProducts() {
-    List<Product> productList = productRepository.findAll();
+  public List<ProductResponseDto> getProducts(User user) {
+    List<Product> productList = productRepository.findAllByUser(user);
     // 반환해줄 Dto 생성
     List<ProductResponseDto> responseDtoList = new ArrayList<>();
 
@@ -60,6 +61,20 @@ public class ProductService {
     Product product = productRepository.findById(id).orElseThrow(()->
             new NullPointerException("해당 상품은 존재하지 않습니다"));
     product.updateByItemDto(itemDto); // DirtyChecking
+
+  }
+
+  // 관리자는 모든 계정에서 등록한 상품을 볼 수 있다
+  public List<ProductResponseDto> getAllProducts() {
+    List<Product> productList = productRepository.findAll();
+    // 반환해줄 Dto 생성
+    List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+    for (Product product : productList){
+      responseDtoList.add(new ProductResponseDto(product));
+    }
+
+    return responseDtoList;
 
   }
 }
