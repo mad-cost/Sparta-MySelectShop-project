@@ -10,8 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -27,7 +25,7 @@ public class ProductController {
           // SecurityContext는 인증이 완료된 사용자의 상세 정보를 UserDetails를 통하여 Authentication/Principal에 저장
           @AuthenticationPrincipal // 회원 객체 가져오기
           UserDetailsImpl userDetails
-  ){
+  ) {
     return productService.createProduct(requestDto, userDetails.getUser());
   }
 
@@ -38,7 +36,7 @@ public class ProductController {
           Long id,
           @RequestBody
           ProductMypriceRequestDto requestDto // myprice(희망 금액)
-  ){
+  ) {
     return productService.updateProduct(id, requestDto);
     // basic.js의 success가 실행되어 '/'로 이동
   }
@@ -58,10 +56,10 @@ public class ProductController {
           // 회원 객체 가져오기
           @AuthenticationPrincipal
           UserDetailsImpl userDetails
-  ){
+  ) {
     return productService.getProducts(userDetails.getUser(),
             // page-1: 뷰에서는 0부터 시작하기 위해
-            page-1, size, sortBy, isAsc
+            page - 1, size, sortBy, isAsc
     );
   }
 
@@ -71,5 +69,19 @@ public class ProductController {
   public List<ProductResponseDto> getAllProducts(){
     return productService.getAllProducts();
   } */
+
+
+  // 관심 폴더에 추가
+  @PostMapping("/products/{productId}/folder")
+  public void addFolder(
+          @PathVariable
+          Long productId,
+          @RequestParam // ?key=value
+          Long folderId,
+          @AuthenticationPrincipal
+          UserDetailsImpl userDetails
+  ) {
+    productService.addFolder(productId, folderId, userDetails.getUser());
+  }
 
 }

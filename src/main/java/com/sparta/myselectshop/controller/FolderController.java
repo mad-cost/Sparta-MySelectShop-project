@@ -2,14 +2,12 @@ package com.sparta.myselectshop.controller;
 
 
 import com.sparta.myselectshop.dto.FolderRequestDto;
+import com.sparta.myselectshop.dto.FolderResponseDto;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.FolderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,6 +29,16 @@ public class FolderController {
     // 받아온 폴더의 중복을 검사하고, 중복하지 않은 폴더 저장하기
     folderService.addFolder(folderNames, userDetails.getUser());
   }
+
+  // 폴더 전체 조호;
+  @GetMapping("/folders")
+  public List<FolderResponseDto> getFolders(
+          @AuthenticationPrincipal
+          UserDetailsImpl userDetails
+  ){
+    return folderService.getFolders(userDetails.getUser());
+  }
+
 
 
 }
