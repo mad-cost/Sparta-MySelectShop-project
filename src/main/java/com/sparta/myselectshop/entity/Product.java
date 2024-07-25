@@ -45,7 +45,7 @@ public class Product extends Timestamped {
 
 
   // N:M 관계 중간 테이블 사용
-  @OneToMany(mappedBy = "product")
+  @OneToMany(mappedBy = "product") // default: LAZY
   private List<ProductFolder> productFolderList = new ArrayList<>();
 
   public Product(ProductRequestDto requestDto, User user) {

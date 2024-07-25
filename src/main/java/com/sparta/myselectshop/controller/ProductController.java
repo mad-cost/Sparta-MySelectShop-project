@@ -84,4 +84,27 @@ public class ProductController {
     productService.addFolder(productId, folderId, userDetails.getUser());
   }
 
+  // 폴더 클릭시 폴더에 해당하는 상품 가져오기
+  @GetMapping("/folders/{folderId}/products")
+  public Page<ProductResponseDto> getProductsInFolder(
+          @PathVariable
+          Long folderId,
+          // 페이징 처리
+          @RequestParam("page")
+          int page, // 조회할 페이지 번호 (1부터 시작)
+          @RequestParam("size")
+          int size, // 한 페이지에 보여줄 상품 개수
+          @RequestParam("sortBy")
+          String sortBy, // 오름차순 버튼 or 내림차순 버튼
+          @RequestParam("isAsc")
+          boolean isAsc, // true, false
+          @AuthenticationPrincipal // 유저 정보
+          UserDetailsImpl userDetails
+  ) {
+    return productService.getProductsInFolder(
+            folderId, page-1, size, sortBy, isAsc, userDetails.getUser()
+    );
+  }
+
+
 }

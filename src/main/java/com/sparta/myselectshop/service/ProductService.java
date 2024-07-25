@@ -74,8 +74,7 @@ public class ProductService {
     }else { // 관리자
       productList = productRepository.findAll(pageable);
     }
-    // "<U> Page<U> map(Function<? super T, ? extends U> converter);"의 map()사용하여 변환
-    // Page<Product> -> Page<ProductResponseDto>
+    // 형변환: productList -> ProductResponseDto / Page 에서 converter 제공
     return productList.map(ProductResponseDto::new);
   }
 
@@ -130,5 +129,20 @@ public class ProductService {
     // 검증이 끝났다면 ProductFolder에 등록
     productFolderRepository.save(new ProductFolder(product, folder));
 
+  }
+
+  public Page<ProductResponseDto> getProductsInFolder(Long folderId, int page, int size, String sortBy, boolean isAsc, User user) {
+    // 페이징 처리
+    Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+    Sort sort = Sort.by(direction, sortBy);
+    Pageable pageable = PageRequest.of(page, size, sort);
+
+    // Product와 ProductFolder는 양방향 관계,
+    // 즉, Product에서 User 객체를 찾고 / ProductFolderList_FolderId: ProductFolderList의 FolderId에 해당하는 Product(productRepository)를 찾아라
+    Page<Product> productList= productRepository.findAllByUserAndProductFolderList_FolderId(user, folderId, pageable);
+
+    // 형변환: productList -> ProductResponseDto / Page 에서 converter 제공
+    Page<ProductResponseDto> responseDtos = productList.map(ProductResponseDto::new);
+    return responseDtos;
   }
 }
