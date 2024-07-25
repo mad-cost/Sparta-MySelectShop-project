@@ -48,7 +48,10 @@ public class ProductService {
     return new ProductResponseDto(product);
   }
 
+
   // 관심 상품 조회
+  @Transactional(readOnly = true)
+  // productList.map(ProductResponseDto::new)에서 지연로딩 발생 함으로 Transactional 필수
   public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
     // 정렬 방법: 받아온 파라미터가 true -> 오름차순, false -> 내림차순
     Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
