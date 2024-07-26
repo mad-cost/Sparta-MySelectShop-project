@@ -106,7 +106,7 @@ public class UserController {
     String token = kakaoService.kakaoLogin(code);
 
     // 쿠키 생성
-    Cookie cookie = new Cookie(JwtUtil.AUTHORIZATION_HEADER, token);
+    Cookie cookie = new Cookie(JwtUtil.AUTHORIZATION_HEADER, token.substring(7));
     cookie.setPath("/"); // 메인 페이지를 Path로 넣어준다
     // JWT담은 cookie를 브라우저의 쿠키 스토리지에 넣어준다
     response.addCookie(cookie);
