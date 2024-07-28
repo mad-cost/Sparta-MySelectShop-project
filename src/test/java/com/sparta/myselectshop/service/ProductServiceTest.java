@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
+// 단위 테스트
 @ExtendWith(MockitoExtension.class) // @Mock 사용을 위해 설정합니다.
 class ProductServiceTest {
 
