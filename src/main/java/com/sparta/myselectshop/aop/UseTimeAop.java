@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Slf4j(topic = "UseTimeAop")
-@Aspect
+@Aspect // 빈(Bean) 클래스에만 적용 가능.
 @Component
 // SpringAOP 사용하기
 public class UseTimeAop {
@@ -34,6 +34,7 @@ public class UseTimeAop {
   @Pointcut("execution(* com.sparta.myselectshop.naver.controller.NaverApiController.*(..))")
   private void naver() {}
 
+  // @Around: 핵심기능' 수행 전과 후 (@Before + @After)
   @Around("product() || folder() || naver()") // 해당 컨트롤러의 메서드에 해당할 경우 실행
   public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
     // 측정 시작 시간
@@ -41,6 +42,7 @@ public class UseTimeAop {
 
     try {
       // 핵심기능 수행
+      // joinPoint.proceed(): 컨트롤러에 원래 호출하려고 했던 함수, 인수(argument) 가 전달 된다. (노션 "AOP 적용 후" 그림을 보면 이해가 쉽다)
       Object output = joinPoint.proceed();
       return output;
     } finally {
