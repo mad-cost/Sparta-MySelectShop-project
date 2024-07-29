@@ -3,6 +3,9 @@ package com.sparta.myselectshop.controller;
 import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
+import com.sparta.myselectshop.entity.ApiUseTime;
+import com.sparta.myselectshop.entity.User;
+import com.sparta.myselectshop.repository.ApiUseTimeRepository;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class ProductController {
   private final ProductService productService;
+  private final ApiUseTimeRepository apiUseTimeRepository;
 
   // 관심상품 제품 등록
   @PostMapping("/products")
@@ -22,11 +26,38 @@ public class ProductController {
           // 일반적으로 RESTful 웹 서비스에서 클라이언트가 서버로 데이터를 전송할 때 사용
           @RequestBody // HTTP 요청의 본문(body)을 자바 객체로 변환하는 데 사용
           ProductRequestDto requestDto,
-          // SecurityContext는 인증이 완료된 사용자의 상세 정보를 UserDetails를 통하여 Authentication/Principal에 저장
-          @AuthenticationPrincipal // 회원 객체 가져오기
+          @AuthenticationPrincipal // 회원 정보
           UserDetailsImpl userDetails
   ) {
-    return productService.createProduct(requestDto, userDetails.getUser());
+    // 측정 시작 시간
+    long startTime = System.currentTimeMillis();
+
+    try {
+      // 응답 보내기
+      return productService.createProduct(requestDto, userDetails.getUser());
+    } finally { // 무조건 실행
+      // 측정 종료 시간
+      long endTime = System.currentTimeMillis();
+      // 수행시간 = 종료 시간 - 시작 시간
+      long runTime = endTime - startTime;
+
+      // 로그인 회원 정보
+      User loginUser = userDetails.getUser();
+
+      // API 사용시간 및 DB 에 기록
+      ApiUseTime apiUseTime = apiUseTimeRepository.findByUser(loginUser)
+              .orElse(null);
+      if (apiUseTime == null) {
+        // 로그인 회원의 기록이 없으면
+        apiUseTime = new ApiUseTime(loginUser, runTime);
+      } else {
+        // 로그인 회원의 기록이 이미 있으면
+        apiUseTime.addUseTime(runTime);
+      }
+
+      System.out.println("[API Use Time] Username: " + loginUser.getUsername() + ", Total Time: " + apiUseTime.getTotalTime() + " ms");
+      apiUseTimeRepository.save(apiUseTime);
+    }
   }
 
   // 관심상품 희망 최저가
