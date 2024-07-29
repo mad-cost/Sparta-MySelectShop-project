@@ -42,20 +42,4 @@ public class FolderController {
   ){
     return folderService.getFolders(userDetails.getUser());
   }
-
-  // @ExceptionHandler: 컨트롤러에서 예외가 발생시 처리하기 위해 제공,
-  // AOP를 이용한 예외 처리와 같다 -> 메서드마다 try-catch를 사용할 필요가 없다.
-  @ExceptionHandler({IllegalArgumentException.class})
-  public ResponseEntity<RestApiException> handleException(IllegalArgumentException ex) {
-    System.out.println("FolderController.handleException");
-    RestApiException restApiException = new RestApiException(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-    // F12 / 네트워크 / Response 에서 확인이 가능하다
-    return new ResponseEntity<>(
-            // HTTP body
-            restApiException,
-            // HTTP status code
-            HttpStatus.BAD_REQUEST
-    );
-  }
-
 }
