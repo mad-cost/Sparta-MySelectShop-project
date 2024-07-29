@@ -4,12 +4,14 @@ import com.sparta.myselectshop.dto.ProductMypriceRequestDto;
 import com.sparta.myselectshop.dto.ProductRequestDto;
 import com.sparta.myselectshop.dto.ProductResponseDto;
 import com.sparta.myselectshop.entity.*;
+import com.sparta.myselectshop.exception.ProductNotFoundException;
 import com.sparta.myselectshop.naver.dto.ItemDto;
 import com.sparta.myselectshop.repository.FolderRepository;
 import com.sparta.myselectshop.repository.ProductFolderRepository;
 import com.sparta.myselectshop.repository.ProductRepository;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -27,6 +30,7 @@ public class ProductService {
   private final ProductRepository productRepository;
   private final FolderRepository folderRepository;
   private final ProductFolderRepository productFolderRepository;
+  private final MessageSource messageSource;
 
   public static final int MIN_MY_PRICE = 100; // 최저가 상수 설정
 
@@ -40,11 +44,26 @@ public class ProductService {
     // 받아온 ProductMypriceRequestDto객체의 myprice필드
     int myprice = requestDto.getMyprice();
     if (myprice < MIN_MY_PRICE) {
-      throw new IllegalArgumentException("유효하지 않은 관심 가격 입니다. 최소 " + MIN_MY_PRICE + "원 이상으로 설정해 주세요.");
+      throw new IllegalArgumentException(
+              messageSource.getMessage(
+                      "below.min.my.price",
+                      new Integer[]{MIN_MY_PRICE}, // message.properties에서 매개변수를 사용할 경우 전달하는 값
+                      "Wrong Price", // 1번 파라미터의 code가 없을경우, 3번 파라미터에서 defaultMessage로 지정해준 "Wrong Price"를 반환한다
+                      Locale.getDefault() // 4번째 파라미터는 번역 언어설정을 전달 (기본 언어설정)
+              )
+      );
     }
     // 받아온 아이디 상품 존재 확인
     Product product = productRepository.findById(id).orElseThrow(() ->
-            new NullPointerException("해당 상품을 찾을 수 없습니다.")
+            // 직접 Custom으로 만든 exception
+            new ProductNotFoundException(
+                    // message.properties 참조
+                    messageSource.getMessage(
+                            "not.found.product",
+                            null,
+                            "Not Found Product",
+                            Locale.getDefault()
+                    ))
     );
     // Transactional의 DirtyChecking 사용: 받아온 상품에 myprice 함께 저장
     product.update(requestDto);
