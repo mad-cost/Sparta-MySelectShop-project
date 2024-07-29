@@ -3,9 +3,12 @@ package com.sparta.myselectshop.controller;
 
 import com.sparta.myselectshop.dto.FolderRequestDto;
 import com.sparta.myselectshop.dto.FolderResponseDto;
+import com.sparta.myselectshop.exception.RestApiException;
 import com.sparta.myselectshop.security.UserDetailsImpl;
 import com.sparta.myselectshop.service.FolderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +33,8 @@ public class FolderController {
     folderService.addFolder(folderNames, userDetails.getUser());
   }
 
-  // 폴더 전체 조호;
+  
+  // 폴더 전체 조회
   @GetMapping("/folders")
   public List<FolderResponseDto> getFolders(
           @AuthenticationPrincipal
@@ -39,6 +43,19 @@ public class FolderController {
     return folderService.getFolders(userDetails.getUser());
   }
 
-
+  // @ExceptionHandler: 컨트롤러에서 예외가 발생시 처리하기 위해 제공,
+  // AOP를 이용한 예외 처리와 같다 -> 메서드마다 try-catch를 사용할 필요가 없다.
+  @ExceptionHandler({IllegalArgumentException.class})
+  public ResponseEntity<RestApiException> handleException(IllegalArgumentException ex) {
+    System.out.println("FolderController.handleException");
+    RestApiException restApiException = new RestApiException(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+    // F12 / 네트워크 / Response 에서 확인이 가능하다
+    return new ResponseEntity<>(
+            // HTTP body
+            restApiException,
+            // HTTP status code
+            HttpStatus.BAD_REQUEST
+    );
+  }
 
 }
